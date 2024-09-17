@@ -3,9 +3,9 @@ from telethon import TelegramClient
 from decouple import config
 
 # Получаем данные из .env файла
-api_id = config('API_ID')  # ID API из вашего приложения Telegram
-api_hash = config('API_HASH')  # Hash API из вашего приложения Telegram
-phone_number = config('PHONE_NUMBER')  # Ваш номер телефона, зарегистрированный в Telegram
+api_id = config('API_ID')
+api_hash = config('API_HASH')
+phone_number = config('PHONE_NUMBER')
 
 # Создаем клиент Telethon
 client = TelegramClient('session_name', api_id, api_hash)
@@ -13,7 +13,7 @@ client = TelegramClient('session_name', api_id, api_hash)
 async def delete_all_messages():
     await client.start(phone=phone_number)
 
-    chat_id = -1002373613951  # Используем правильный ID чата для приватного чата
+    chat_id = -1001443488822  # Новый ID чата для второго приватного чата
 
     async for message in client.iter_messages(chat_id):
         if message.sender_id == (await client.get_me()).id:  # Проверка, что сообщение ваше
