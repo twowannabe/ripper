@@ -1,24 +1,12 @@
-import time
-from telethon import TelegramClient
-from decouple import config
-
-# Получаем данные из .env файла
-api_id = config('API_ID')
-api_hash = config('API_HASH')
-phone_number = config('PHONE_NUMBER')
-
-# Создаем клиент Telethon
-client = TelegramClient('session_name', api_id, api_hash)
+chat_id = -1002373613951  # ID чата с префиксом -100
 
 async def delete_all_messages():
     await client.start(phone=phone_number)
 
-    chat = '-1002373613951'  # Укажите ID чата или его название
-
-    async for message in client.iter_messages(chat):
+    async for message in client.iter_messages(chat_id):
         if message.sender_id == (await client.get_me()).id:  # Проверка, что сообщение ваше
             try:
-                await client.delete_messages(chat, message.id, revoke=True)  # Удаление сообщения для всех
+                await client.delete_messages(chat_id, message.id, revoke=True)  # Удаление сообщения для всех
                 print(f'Удалено сообщение с ID {message.id}')
 
                 # Добавляем задержку в несколько секунд, чтобы избежать блокировки
