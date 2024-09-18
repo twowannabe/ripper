@@ -13,7 +13,7 @@ client = TelegramClient('session_name', api_id, api_hash)
 async def delete_all_messages():
     await client.start(phone=phone_number)
 
-    chat_id = -1001443488822  # Новый ID чата для второго приватного чата
+    chat_id = -1002040669914  # Новый ID чата для второго приватного чата
 
     async for message in client.iter_messages(chat_id):
         if message.sender_id == (await client.get_me()).id:  # Проверка, что сообщение ваше
