@@ -1,9 +1,28 @@
-from telethon.tl.types import PeerChannel, PeerChat
+from telethon import TelegramClient
+from decouple import config
 
-async def get_chat_id():
+# Получаем данные из .env файла
+api_id = config('API_ID')
+api_hash = config('API_HASH')
+phone_number = config('PHONE_NUMBER')
+
+# Создаем клиент Telethon
+client = TelegramClient('session_name', api_id, api_hash)
+
+async def list_chats():
+    await client.start(phone=phone_number)
+
+    # Проходим по всем диалогам (чатам, каналам, группам)
     async for dialog in client.iter_dialogs():
-        if isinstance(dialog.entity, PeerChannel) or isinstance(dialog.entity, PeerChat):
-            print(f'Название: {dialog.name}, ID: {dialog.id}')
+        chat_id = dialog.id
+        chat_name = dialog.name
 
+        # Если чат приватный, то ID начинается с -100
+        if chat_id < 0:
+            chat_id = f"-100{abs(chat_id)}"
+
+        print(f'Название: {chat_name}, ID: {chat_id}')
+
+# Запускаем клиент и выполняем функцию получения списка чатов
 with client:
-    client.loop.run_until_complete(get_chat_id())
+    client.loop.run_until_complete(list_chats())
