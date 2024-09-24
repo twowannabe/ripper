@@ -2,6 +2,7 @@ import time
 import asyncio
 from telethon import TelegramClient
 from telethon.errors import FloodWaitError
+from telethon.errors.rpcerrorlist import ChatAdminRequiredError, ChannelPrivateError
 from decouple import config
 
 # Получаем данные из .env файла
@@ -20,6 +21,19 @@ async def delete_all_messages():
     for chat_id_str in chat_ids:
         chat_id = int(chat_id_str.strip())
         print(f'Обрабатываем чат с ID {chat_id}')
+
+        try:
+            # Проверяем доступность чата
+            entity = await client.get_entity(chat_id)
+        except ValueError as e:
+            print(f'Чат с ID {chat_id} не найден: {e}')
+            continue
+        except (ChatAdminRequiredError, ChannelPrivateError) as e:
+            print(f'Нет доступа к чату с ID {chat_id}: {e}')
+            continue
+        except Exception as e:
+            print(f'Не удалось получить чат с ID {chat_id}: {e}')
+            continue
 
         messages_to_delete = []
         delay = 0.5  # Начальная задержка в секундах
