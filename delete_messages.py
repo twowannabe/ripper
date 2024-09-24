@@ -13,7 +13,14 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 api_id = config('API_ID')
 api_hash = config('API_HASH')
 phone_number = config('PHONE_NUMBER')
-chat_ids = config('CHAT_IDS').split(',')
+
+# Считываем chat_ids из файла chat_ids.env
+chat_ids_file = 'chat_ids.env'
+chat_ids = []
+with open(chat_ids_file, 'r') as file:
+    for line in file:
+        if line.startswith('CHAT_IDS'):
+            chat_ids = line.split('=')[1].strip().split(',')
 
 # Создаем клиент Telethon
 client = TelegramClient('session_name', api_id, api_hash)
