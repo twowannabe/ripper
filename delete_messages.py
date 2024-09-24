@@ -55,8 +55,10 @@ async def delete_all_messages():
 
         while True:
             try:
+                # Получаем сообщения от пользователя
                 history = await client.get_messages(chat_id, limit=limit, offset_id=offset_id, from_user='me')
                 if not history:
+                    logging.info(f'Нет сообщений для удаления в чате {chat_id}. Пропускаем.')
                     break  # Если сообщений больше нет, выходим из цикла
 
                 for message in history:
@@ -82,6 +84,7 @@ async def delete_all_messages():
                             logging.error(f'Не удалось удалить сообщения в чате {chat_id}: {e}')
                             break
 
+                # Обновляем offset_id для следующего запроса
                 offset_id = history[-1].id
                 await asyncio.sleep(0.1)  # Небольшая задержка между запросами
 
