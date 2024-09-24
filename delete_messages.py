@@ -43,8 +43,9 @@ async def delete_all_messages():
         messages_to_delete = []
         delay = 0.5  # Начальная задержка в секундах
 
-        async for message in client.iter_messages(chat_id):
-            if message.sender_id == me.id:
+        # Обработка FloodWaitError при итерации сообщений
+        try:
+            async for message in client.iter_messages(chat_id, from_user='me', buffer_size=20):
                 messages_to_delete.append(message.id)
 
                 if len(messages_to_delete) >= 100:
@@ -66,6 +67,11 @@ async def delete_all_messages():
                         except Exception as e:
                             logging.error(f'Не удалось удалить сообщения в чате {chat_id}: {e}')
                             break
+
+                await asyncio.sleep(0.1)  # Небольшая задержка между запросами
+        except FloodWaitError as e:
+            logging.warning(f'Превышен лимит запросов при получении сообщений. Ожидание {e.seconds} секунд.')
+            await asyncio.sleep(e.seconds)
 
         # Удаляем оставшиеся сообщения
         if messages_to_delete:
@@ -91,7 +97,6 @@ async def delete_all_messages():
         await asyncio.sleep(2)
 
     logging.info(f'Операция завершена, всего удалено сообщений: {total_deleted}')
-
 
 # Запускаем клиент и выполняем функцию удаления
 with client:
