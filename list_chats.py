@@ -1,9 +1,8 @@
 from telethon import TelegramClient
 from decouple import config
-import os
 
 # Получаем данные из .env файла
-api_id = config('API_ID')
+api_id = config('API_ID', cast=int)
 api_hash = config('API_HASH')
 phone_number = config('PHONE_NUMBER')
 chat_ids_file = 'chat_ids.env'  # Файл для хранения chat_ids
@@ -23,15 +22,11 @@ async def list_chats():
 
         # Фильтруем только группы
         if dialog.is_group:
-            # Если чат приватный, то ID начинается с -100
-            if chat_id < 0:
-                chat_id = f"-100{abs(chat_id)}"
-
             print(f'Название: {chat_name}, ID: {chat_id}')
-            chat_ids.append(chat_id)  # Добавляем chat_id в список
+            chat_ids.append(str(chat_id))  # Добавляем chat_id в список
 
     # Преобразуем список chat_ids в строку для записи в файл
-    chat_ids_str = ','.join(str(id) for id in chat_ids)
+    chat_ids_str = ','.join(chat_ids)
 
     # Записываем chat_ids в новый файл в формате переменной
     with open(chat_ids_file, 'w') as file:
