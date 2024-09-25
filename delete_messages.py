@@ -32,11 +32,21 @@ async def delete_all_messages():
 
     for chat_id_str in chat_ids:
         chat_id = int(chat_id_str.strip())
-        logging.info(f'Обрабатываем чат с ID {chat_id}')
 
         try:
             # Проверяем доступность чата
             entity = await client.get_entity(chat_id)
+
+            # Получаем название чата
+            if hasattr(entity, 'title') and entity.title:
+                chat_name = entity.title
+            elif hasattr(entity, 'first_name') and entity.first_name:
+                chat_name = entity.first_name
+            else:
+                chat_name = 'Без названия'
+
+            logging.info(f'Обрабатываем чат "{chat_name}" (ID {chat_id})')
+
         except ValueError as e:
             logging.error(f'Чат с ID {chat_id} не найден: {e}')
             continue
@@ -58,7 +68,7 @@ async def delete_all_messages():
                 # Получаем сообщения от пользователя
                 history = await client.get_messages(chat_id, limit=limit, offset_id=offset_id, from_user='me')
                 if not history:
-                    logging.info(f'Нет сообщений для удаления в чате {chat_id}. Пропускаем.')
+                    logging.info(f'Нет сообщений для удаления в чате "{chat_name}" (ID {chat_id}). Пропускаем.')
                     break  # Если сообщений больше нет, выходим из цикла
 
                 for message in history:
@@ -70,7 +80,7 @@ async def delete_all_messages():
                         try:
                             await client.delete_messages(chat_id, messages_to_delete, revoke=True)
                             total_deleted += len(messages_to_delete)  # Обновляем счетчик
-                            logging.info(f'Удалено {len(messages_to_delete)} сообщений в чате {chat_id}')
+                            logging.info(f'Удалено {len(messages_to_delete)} сообщений в чате "{chat_name}" (ID {chat_id})')
                             logging.info(f'Всего удалено сообщений: {total_deleted}')
                             messages_to_delete = []
                             await asyncio.sleep(delay)
@@ -81,7 +91,7 @@ async def delete_all_messages():
                             await asyncio.sleep(e.seconds)
                             delay *= 1.5
                         except Exception as e:
-                            logging.error(f'Не удалось удалить сообщения в чате {chat_id}: {e}')
+                            logging.error(f'Не удалось удалить сообщения в чате "{chat_name}" (ID {chat_id}): {e}')
                             break
 
                 # Обновляем offset_id для следующего запроса
@@ -92,7 +102,7 @@ async def delete_all_messages():
                 logging.warning(f'Превышен лимит запросов при получении сообщений. Ожидание {e.seconds} секунд.')
                 await asyncio.sleep(e.seconds)
             except Exception as e:
-                logging.error(f'Ошибка при получении сообщений из чата {chat_id}: {e}')
+                logging.error(f'Ошибка при получении сообщений из чата "{chat_name}" (ID {chat_id}): {e}')
                 break
 
         # Добавляем задержку между обработкой разных чатов
